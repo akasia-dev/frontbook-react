@@ -8,8 +8,8 @@ import { ModifySourcePlugin } from 'modify-source-webpack-plugin'
 
 import {
   createComponentIndex,
-  removeComponentIndex,
-  resolveTsconfigPathsToAlias
+  resolveTsconfigPathsToAlias,
+  tempPath
 } from './utils'
 
 // * Project Package Json
@@ -27,18 +27,12 @@ const projectConfig = fs.existsSync(projectConfigPath)
 // * Auto generate entry file
 createComponentIndex()
 
-// * Delete the entry file at the end of the program.
-process.on('SIGINT', () => {
-  removeComponentIndex()
-  process.exit(1)
-})
-
 // * Framework Webpack Config
 const config: webpack.Configuration = {
   mode: 'production',
   entry: {
     // * Auto generated entry file
-    app: path.join(process.cwd(), 'core/webpack/_temp/index.ts')
+    app: path.join(tempPath, 'index.ts')
   },
   output: {
     path: path.resolve(process.cwd(), 'export'),
@@ -89,7 +83,19 @@ const config: webpack.Configuration = {
         use: [
           { loader: 'ts-loader' },
           {
-            loader: 'babel-loader'
+            loader: 'babel-loader',
+            options: {
+              presets: [
+                [
+                  '@babel/preset-react',
+                  {
+                    runtime: 'automatic',
+                    importSource: 'preact-jsx-runtime'
+                  }
+                ]
+              ],
+              plugins: ['babel-plugin-typescript-to-proptypes']
+            }
           }
         ]
       }

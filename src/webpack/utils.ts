@@ -53,7 +53,7 @@ const registerComponent = <T>(kebabName: string, component: React.FC<T>) => {
 }
 `
 
-export const tempPath = path.resolve(process.cwd(), 'core/webpack/_temp/')
+export const tempPath = path.resolve(process.cwd(), '.frontbook_build')
 
 export const createComponentIndex = () => {
   const indexTsPath = path.resolve(tempPath, 'index.ts')
