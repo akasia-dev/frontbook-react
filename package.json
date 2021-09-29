@@ -1,6 +1,6 @@
 {
   "name": "frontbook-react",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "frontbook's react build module.",
   "main": "./dist/index.js",
   "bin": {
