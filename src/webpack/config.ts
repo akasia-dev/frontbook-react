@@ -35,7 +35,7 @@ const config: webpack.Configuration = {
     app: path.join(tempPath, 'index.ts')
   },
   output: {
-    path: path.resolve(process.cwd(), 'export'),
+    path: path.resolve(process.cwd(), '.frontbook'),
     filename: `${packageJson.name}-${packageJson.version}.js`
   },
   resolve: {

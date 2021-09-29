@@ -5,7 +5,16 @@ import { removeComponentIndex } from './utils'
 export const exportScript = async () => {
   return webpack(config).run((error, stats) => {
     if (error) console.error(error)
-    if (stats) console.log(stats.toString())
+    if (stats)
+      process.stdout.write(
+        stats.toString({
+          colors: true,
+          modules: false,
+          children: false,
+          chunks: false,
+          chunkModules: false
+        }) + '\n'
+      )
     removeComponentIndex()
   })
 }
@@ -18,7 +27,16 @@ export const watchScript = () => {
     },
     (error, stats) => {
       if (error) console.error(error)
-      if (stats) console.log(stats.toString())
+      if (stats)
+        process.stdout.write(
+          stats.toString({
+            colors: true,
+            modules: false,
+            children: false,
+            chunks: false,
+            chunkModules: false
+          }) + '\n'
+        )
       removeComponentIndex()
     }
   )
