@@ -1,2 +1,2 @@
-# frontbook-cli
-frontbook's CLI command module.
+# frontbook-react
+frontbook's react build module.

@@ -15,12 +15,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/akasia-dev/frontbook-cli.git"
+    "url": "git+https://github.com/akasia-dev/frontbook-react.git"
   },
   "author": "akasia-dev",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/akasia-dev/frontbook-cli/issues"
+    "url": "https://github.com/akasia-dev/frontbook-react/issues"
   },
   "devDependencies": {
     "@types/node": "^16.6.2",
@@ -47,7 +47,7 @@
     "webpack-cli": "^4.8.0",
     "webpack-merge": "^5.8.0"
   },
-  "homepage": "https://github.com/akasia-dev/frontbook-cli#readme",
+  "homepage": "https://github.com/akasia-dev/frontbook-react#readme",
   "dependencies": {
     "yargs": "^17.2.1"
   }
