@@ -37,7 +37,11 @@ export const watchScript = () => {
             chunkModules: false
           }) + '\n'
         )
-      removeComponentIndex()
+
+      process.on('SIGINT', () => {
+        removeComponentIndex()
+        process.exit(0)
+      })
     }
   )
 }

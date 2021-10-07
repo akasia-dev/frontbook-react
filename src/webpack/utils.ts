@@ -33,30 +33,9 @@ export const resolveTsconfigPathsToAlias = ({
   return aliases
 }
 
-export const basedCode = `import React from 'react'
-import ReactDOM from 'react-dom'
-import reactToWebComponent from 'react-to-webcomponent'
-
-const registerComponent = <T>(kebabName: string, component: React.FC<T>) => {
-  if (
-    typeof window !== 'undefined' &&
-    typeof window.customElements !== 'undefined' &&
-    typeof component !== 'undefined'
-  ) {
-    window.customElements.define(
-      kebabName,
-      reactToWebComponent(component, React, ReactDOM, {
-        shadow: false
-      })
-    )
-  }
-}
-`
-
-export const tempPath = path.resolve(process.cwd(), '.frontbook_build')
+export const tempPath = path.resolve(process.cwd(), '.frontbook/build')
 
 export const createComponentIndex = () => {
-  const indexTsPath = path.resolve(tempPath, 'index.ts')
   const componentPath = path.resolve(process.cwd(), 'component')
 
   fs.mkdirSync(tempPath, { recursive: true })
@@ -85,8 +64,26 @@ export const createComponentIndex = () => {
       )
     })
 
-  const code = `${basedCode}\n${components.join('\n\n')}`
-  fs.writeFileSync(indexTsPath, code)
+  const injectCodeFolderPath = path.resolve(
+    __dirname,
+    '../..',
+    'src',
+    'webpack',
+    'inject'
+  )
+
+  const injectModuleCode = String(
+    fs.readFileSync(path.resolve(injectCodeFolderPath, 'module.ts'))
+  )
+  fs.writeFileSync(path.resolve(tempPath, 'module.ts'), injectModuleCode)
+
+  const injectIndexCode = String(
+    fs.readFileSync(path.resolve(injectCodeFolderPath, 'index.ts'))
+  )
+  fs.writeFileSync(
+    path.resolve(tempPath, 'index.ts'),
+    `${injectIndexCode}\n${components.join('\n\n')}`
+  )
 }
 
 export const removeComponentIndex = () => {
