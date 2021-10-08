@@ -1,23 +1,25 @@
+import type ReactNamespace from 'react'
 const reactComponentSymbol = Symbol.for('r2wc.reactComponent')
 const renderSymbol = Symbol.for('r2wc.reactRender')
 const shouldRenderSymbol = Symbol.for('r2wc.shouldRender')
 
-const define = {
-  // Creates a getter/setter that re-renders everytime a property is set.
-  expando: (receiver, key, value) => {
-    Object.defineProperty(receiver, key, {
-      enumerable: true,
-      get: () => value,
-      set: function (newValue) {
-        value = newValue
-        this[renderSymbol]()
-      }
-    })
-    receiver[renderSymbol]()
-  }
+/**
+ * Creates a getter/setter that re-renders
+ * everytime a property is set.
+ */
+const expando = (receiver, key, value) => {
+  Object.defineProperty(receiver, key, {
+    enumerable: true,
+    get: () => value,
+    set: function (newValue) {
+      value = newValue
+      this[renderSymbol]()
+    }
+  })
+  receiver[renderSymbol]()
 }
-
-const isAllCaps = (word) => word.split('').every((c) => c.toUpperCase() === c)
+const isAllCaps = (word: string) =>
+  word.split('').every((c) => c.toUpperCase() === c)
 
 const flattenIfOne = (arr) => {
   if (!Array.isArray(arr)) return arr
@@ -25,15 +27,15 @@ const flattenIfOne = (arr) => {
   return arr
 }
 
-const convertNamedNodeMapToObject = (namedNodeMap) => {
+const convertNamedNodeMapToObject = (namedNodeMap: NamedNodeMap) => {
   const object = {}
   Array.from(namedNodeMap).map(({ name, value }) => (object[name] = value))
   return object
 }
 
-const mapChildren = (React, node) => {
+const mapChildren = (React: typeof ReactNamespace, node: HTMLElement) => {
   if (node.nodeType === Node.TEXT_NODE) {
-    return node.textContent.toString()
+    return node.textContent?.toString()
   }
 
   return flattenIfOne(
@@ -56,26 +58,31 @@ const mapChildren = (React, node) => {
 }
 
 /**
- * Converts a React component into a webcomponent by wrapping it in a Proxy object.
+ * Converts a React component into a webcomponent
+ * by wrapping it in a Proxy object.
  * @param {ReactComponent}
  * @param {React}
  * @param {ReactDOM}
  * @param {Object} options - Optional parameters
  * @param {String?} options.shadow - Use shadow DOM rather than light DOM.
  */
-export default function (
+const ReactWebComponent = (
   ReactComponent,
   React,
   ReactDOM,
   options: { shadow?: boolean } = {}
-) {
+) => {
   const renderAddedProperties = {
     isConnected: 'isConnected' in HTMLElement.prototype
   }
   let rendering = false
   // Create the web component "class"
-  const WebComponent = function () {
-    // @ts-ignore
+
+  /**
+   * @constructor
+   * @this HTMLElement
+   */
+  function WebComponent(this: HTMLElement) {
     const self = Reflect.construct(HTMLElement, arguments, this.constructor)
     if (options.shadow) self.attachShadow({ mode: 'open' })
     return self
@@ -104,7 +111,7 @@ export default function (
       ) {
         return Reflect.set(target, key, value, receiver)
       } else {
-        define.expando(receiver, key, value)
+        expando(receiver, key, value)
       }
       return true
     },
@@ -136,34 +143,31 @@ export default function (
     this[renderSymbol]()
   }
 
-  targetPrototype.disconnectedCallback = function () {
-    // Once disconnected, unmount the component.
+  targetPrototype.disconnectedCallback = () => {
+    // * Once disconnected, unmount the component.
     ReactDOM.unmountComponentAtNode(this)
   }
 
   targetPrototype[renderSymbol] = function () {
     if (this[shouldRenderSymbol] === true) {
       const data = {}
-      Object.keys(this).forEach(function (key) {
-        if (renderAddedProperties[key] !== false) {
-          // @ts-ignore
-          data[key] = this[key]
-        }
+      Object.keys(this).forEach((key) => {
+        if (renderAddedProperties[key] !== false) data[key] = this[key]
       }, this)
       rendering = true
-      Array.from(this.attributes).forEach(function (
-        attr: typeof HTMLElement & HTMLElement
-      ) {
-        if (attr) data[attr.name] = attr.nodeValue
-      })
+      Array.from(this.attributes).forEach(
+        (attr: typeof HTMLElement & HTMLElement) => {
+          if (attr) data[attr.name] = attr.nodeValue
+        }
+      )
 
       setTimeout(() => {
         const children = flattenIfOne(mapChildren(React, this))
 
-        // Container is either shadow DOM or light DOM depending on `shadow` option.
+        // * Container is either shadow DOM or light DOM depending on `shadow` option.
         const container = options.shadow ? this.shadowRoot : this
-        // Use react to render element in container
 
+        // * Use react to render element in container
         this[reactComponentSymbol] = ReactDOM.render(
           (children && !Array.isArray(children)) || children.length !== 0
             ? React.createElement(ReactComponent, data, children)
@@ -178,17 +182,17 @@ export default function (
 
   // Handle attributes changing
   if (ReactComponent.propTypes) {
-    // @ts-ignore
     WebComponent.observedAttributes = Object.keys(ReactComponent.propTypes)
     targetPrototype.attributeChangedCallback = function (
-      name,
-      oldValue,
-      newValue
+      name: string,
+      _oldValue: unknown,
+      newValue: unknown
     ) {
-      // TODO: handle type conversion
       this[name] = newValue
     }
   }
 
   return WebComponent
 }
+
+export default ReactWebComponent
