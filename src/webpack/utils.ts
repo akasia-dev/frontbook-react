@@ -41,7 +41,9 @@ export const createComponentIndex = () => {
   fs.mkdirSync(tempPath, { recursive: true })
 
   const components = glob
-    .sync(path.resolve(componentPath, '**/*.{tsx,jsx}'))
+    .sync(path.resolve(componentPath, '**/*.{tsx,jsx}'), {
+      ignore: ['**/*.*.{tsx,jsx}']
+    })
     .map((component) => {
       const componentFilePath = component
         .split(componentPath)[1]
@@ -80,9 +82,37 @@ export const createComponentIndex = () => {
   const injectIndexCode = String(
     fs.readFileSync(path.resolve(injectCodeFolderPath, 'index.ts'))
   )
+
+  const demoFunctions = glob
+    .sync(path.resolve(componentPath, '**/*.demo.{tsx,jsx}'), {})
+    .map((demoFunction) => {
+      console.log('mockFunction', { demoFunction })
+      const demoFunctionFilePath = demoFunction
+        .split(componentPath)[1]
+        .replace(/\.[^/.]+$/, '')
+
+      const pathSplit = demoFunctionFilePath.replace(/\.[^/.]+$/, '').split('/')
+      const kebabCaseName = pathSplit[pathSplit.length - 1]
+      let pascalCaseName = pathSplit[pathSplit.length - 1].replace(
+        /[-_]([a-z])/g,
+        (_, letter) => letter.toUpperCase()
+      )
+      pascalCaseName = pascalCaseName.replace(/^[a-z]/, (match) =>
+        match.toUpperCase()
+      )
+
+      const componentImportPath = `component${demoFunctionFilePath}`
+      return (
+        `import ${pascalCaseName}DemoFunction from '${componentImportPath}'\n` +
+        `${pascalCaseName}DemoFunction('${kebabCaseName}', ${pascalCaseName})`
+      )
+    })
+
   fs.writeFileSync(
     path.resolve(tempPath, 'index.ts'),
-    `${injectIndexCode}\n${components.join('\n\n')}`
+    `${injectIndexCode}\n${components.join('\n\n')}\n\n${demoFunctions.join(
+      '\n\n'
+    )}`
   )
 }
 

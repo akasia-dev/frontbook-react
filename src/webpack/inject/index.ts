@@ -27,7 +27,7 @@ export interface IFrontbook {
   }) => unknown
 }
 
-declare var window: Window & {
+declare const window: Window & {
   frontbook: IFrontbook
 }
 
@@ -97,10 +97,7 @@ if (typeof window !== 'undefined' && typeof window.frontbook === 'undefined') {
   }
 }
 
-export const registerComponent = <T>(
-  kebabName: string,
-  component: React.FC<T>
-) => {
+export const registerComponent = (kebabName: string, component: any) => {
   if (
     typeof window !== 'undefined' &&
     typeof window.customElements !== 'undefined' &&
