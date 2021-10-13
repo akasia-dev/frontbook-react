@@ -4,60 +4,6 @@ const renderSymbol = Symbol.for('r2wc.reactRender')
 const shouldRenderSymbol = Symbol.for('r2wc.shouldRender')
 
 /**
- * Creates a getter/setter that re-renders
- * everytime a property is set.
- */
-const expando = (receiver, key, value) => {
-  Object.defineProperty(receiver, key, {
-    enumerable: true,
-    get: () => value,
-    set: function (newValue) {
-      value = newValue
-      this[renderSymbol]()
-    }
-  })
-  receiver[renderSymbol]()
-}
-const isAllCaps = (word: string) =>
-  word.split('').every((c) => c.toUpperCase() === c)
-
-const flattenIfOne = (arr) => {
-  if (!Array.isArray(arr)) return arr
-  if (arr.length === 1) return arr[0]
-  return arr
-}
-
-const convertNamedNodeMapToObject = (namedNodeMap: NamedNodeMap) => {
-  const object = {}
-  Array.from(namedNodeMap).map(({ name, value }) => (object[name] = value))
-  return object
-}
-
-const mapChildren = (React: typeof ReactNamespace, node: HTMLElement) => {
-  if (node.nodeType === Node.TEXT_NODE) {
-    return node.textContent?.toString()
-  }
-
-  return flattenIfOne(
-    Array.from(node.childNodes).map((c: HTMLElement) => {
-      if (c.nodeType === Node.TEXT_NODE) {
-        return c.textContent?.toString()
-      }
-      // BR = br, ReactElement = ReactElement
-      const nodeName = isAllCaps(c.nodeName)
-        ? c.nodeName.toLowerCase()
-        : c.nodeName
-      const children = flattenIfOne(mapChildren(React, c))
-      return React.createElement(
-        nodeName,
-        convertNamedNodeMapToObject(c.attributes),
-        children
-      )
-    })
-  )
-}
-
-/**
  * Converts a React component into a webcomponent
  * by wrapping it in a Proxy object.
  * @param {ReactComponent}
@@ -66,7 +12,7 @@ const mapChildren = (React: typeof ReactNamespace, node: HTMLElement) => {
  * @param {Object} options - Optional parameters
  * @param {String?} options.shadow - Use shadow DOM rather than light DOM.
  */
-const ReactWebComponent = (
+export const ReactWebComponent = (
   ReactComponent,
   React,
   ReactDOM,
@@ -78,10 +24,6 @@ const ReactWebComponent = (
   let rendering = false
   // Create the web component "class"
 
-  /**
-   * @constructor
-   * @this HTMLElement
-   */
   function WebComponent(this: HTMLElement) {
     const self = Reflect.construct(HTMLElement, arguments, this.constructor)
     if (options.shadow) self.attachShadow({ mode: 'open' })
@@ -111,7 +53,7 @@ const ReactWebComponent = (
       ) {
         return Reflect.set(target, key, value, receiver)
       } else {
-        expando(receiver, key, value)
+        expand(receiver, key, value)
       }
       return true
     },
@@ -155,14 +97,12 @@ const ReactWebComponent = (
         if (renderAddedProperties[key] !== false) data[key] = this[key]
       }, this)
       rendering = true
-      Array.from(this.attributes).forEach(
-        (attr: typeof HTMLElement & HTMLElement) => {
-          if (attr) data[attr.name] = attr.nodeValue
-        }
-      )
+      Array.from(this.attributes as NamedNodeMap).forEach((attr) => {
+        if (attr) data[attr.name] = attr.nodeValue
+      })
 
       setTimeout(() => {
-        const children = flattenIfOne(mapChildren(React, this))
+        const children = flattenIfOne(convertToReactChildren(React, this))
 
         // * Container is either shadow DOM or light DOM depending on `shadow` option.
         const container = options.shadow ? this.shadowRoot : this
@@ -193,6 +133,84 @@ const ReactWebComponent = (
   }
 
   return WebComponent
+}
+
+/**
+ * Creates a getter/setter that re-renders
+ * everytime a property is set.
+ */
+export const expand = (
+  receiver: Record<string | number | symbol, () => unknown>,
+  key: string,
+  value: unknown
+) => {
+  Object.defineProperty(receiver, key, {
+    enumerable: true,
+    get: () => value,
+    set: function (newValue) {
+      value = newValue
+      this[renderSymbol]()
+    }
+  })
+  receiver[renderSymbol]()
+}
+
+/**
+ * Check if all letters are capital letters.
+ */
+export const isAllCaps = (word: string) =>
+  word.split('').every((c) => c.toUpperCase() === c)
+
+/**
+ * If there's only one element in the array,
+ * make sure that it's not the array.
+ */
+export const flattenIfOne = (arr: unknown) => {
+  if (!Array.isArray(arr)) return arr
+  if (arr.length === 1) return arr[0]
+  return arr
+}
+
+/**
+ * Convert NamedNodeMap to an object.
+ * It is used when the properties of
+ * pure elements are used to create react components.
+ */
+export const convertNamedNodeMapToObject = (namedNodeMap: NamedNodeMap) => {
+  const object: Record<string, string> = {}
+  Array.from(namedNodeMap).map(({ name, value }) => (object[name] = value))
+  return object
+}
+
+/**
+ * Convert child elements into react elements.
+ */
+export const convertToReactChildren = (
+  React: typeof ReactNamespace,
+  node: HTMLElement
+) => {
+  if (node.nodeType === Node.TEXT_NODE) {
+    return node.textContent?.toString()
+  }
+
+  return flattenIfOne(
+    Array.from(node.childNodes).map((c) => {
+      if (c.nodeType === Node.TEXT_NODE) {
+        return c.textContent?.toString()
+      }
+      const nodeName = isAllCaps(c.nodeName)
+        ? c.nodeName.toLowerCase()
+        : c.nodeName
+      const children = flattenIfOne(
+        convertToReactChildren(React, c as HTMLElement)
+      )
+      return React.createElement(
+        nodeName,
+        convertNamedNodeMapToObject((c as HTMLElement).attributes),
+        children
+      )
+    })
+  )
 }
 
 export default ReactWebComponent
