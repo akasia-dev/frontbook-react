@@ -19,9 +19,9 @@ const packageJson = fs.existsSync(packageJsonPath)
   : {}
 
 // * Project Webpack Config
-const projectConfigPath = path.resolve(process.cwd(), 'webpack.config')
+const projectConfigPath = path.resolve(process.cwd(), 'webpack.config.js')
 const projectConfig = fs.existsSync(projectConfigPath)
-  ? require(projectConfigPath)?.default
+  ? require(projectConfigPath)
   : {}
 
 // * Auto generate entry file

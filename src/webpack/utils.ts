@@ -25,7 +25,6 @@ export const resolveTsconfigPathsToAlias = ({
         webpackConfigBasePath,
         config.paths[item][0].replace('/*', '').replace('*', '')
       )
-
       aliases[key] = value
     })
   }
@@ -86,7 +85,6 @@ export const createComponentIndex = () => {
   const demoFunctions = glob
     .sync(path.resolve(componentPath, '**/*.demo.{tsx,jsx}'), {})
     .map((demoFunction) => {
-      console.log('mockFunction', { demoFunction })
       const demoFunctionFilePath = demoFunction
         .split(componentPath)[1]
         .replace(/\.[^/.]+$/, '')

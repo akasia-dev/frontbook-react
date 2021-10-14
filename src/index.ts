@@ -1,18 +1,19 @@
-import { IContiComponent } from './interface'
+import { IContiComponent, IContiDemoProps } from './interface'
 
 declare const window: Window & {
   frontbook: {
-    demo: Record<string, IContiComponent>
+    demo: IContiComponent[]
   }
 }
 
-export const demo = (props: IContiComponent) => {
+export const demo = (props: IContiDemoProps) => {
   return (name: string, component: (...args) => JSX.Element) => {
     if (typeof window === 'undefined') return
-    window.frontbook.demo[name] = {
+    if (typeof window.frontbook.demo === 'undefined') window.frontbook.demo = []
+    window.frontbook.demo.push({
       ...props,
       name,
       component
-    }
+    })
   }
 }

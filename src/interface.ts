@@ -1,3 +1,13 @@
+export interface IContiDemoProps {
+  controls?: {
+    [propName: string]: IContiComponentProps
+  }
+  renderProps?: (props: IContiStoreComponentValue) => Record<string, any>
+  renderWrapper?: (props: IContiStoreComponentValue) => JSX.Element
+  children?: string
+  documentUrl?: string
+}
+
 export interface IContiComponent {
   name?: string
   component?: (...props) => JSX.Element

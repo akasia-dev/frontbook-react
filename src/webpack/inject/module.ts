@@ -82,7 +82,7 @@ export const ReactWebComponent = (
     // Once connected, it will keep updating the innerHTML.
     // We could add a render method to allow this as well.
     this[shouldRenderSymbol] = true
-    this[renderSymbol]()
+    this[renderSymbol](true)
   }
 
   targetPrototype.disconnectedCallback = () => {
@@ -90,7 +90,7 @@ export const ReactWebComponent = (
     ReactDOM.unmountComponentAtNode(this)
   }
 
-  targetPrototype[renderSymbol] = function () {
+  targetPrototype[renderSymbol] = function (isConnectInit = false) {
     if (this[shouldRenderSymbol] === true) {
       const data = {}
       Object.keys(this).forEach((key) => {
@@ -102,7 +102,13 @@ export const ReactWebComponent = (
       })
 
       setTimeout(() => {
-        const children = flattenIfOne(convertToReactChildren(React, this))
+        let children
+        if (isConnectInit) {
+          children = flattenIfOne(convertToReactChildren(React, this))
+          this.__frontbook__children = children
+        } else {
+          children = this.__frontbook__children
+        }
 
         // * Container is either shadow DOM or light DOM depending on `shadow` option.
         const container = options.shadow ? this.shadowRoot : this
@@ -201,9 +207,11 @@ export const convertToReactChildren = (
       const nodeName = isAllCaps(c.nodeName)
         ? c.nodeName.toLowerCase()
         : c.nodeName
+
       const children = flattenIfOne(
         convertToReactChildren(React, c as HTMLElement)
       )
+
       return React.createElement(
         nodeName,
         convertNamedNodeMapToObject((c as HTMLElement).attributes),
