@@ -79,6 +79,16 @@ export const ReactWebComponent = (
 
   // Setup lifecycle methods
   targetPrototype.connectedCallback = function () {
+    // Re-rendering when children node is updated.
+    let shouldRender = false
+    if (typeof window['MutationObserver'] !== 'undefined') {
+      new MutationObserver((_, element) => {
+        this[shouldRenderSymbol] = true
+        this[renderSymbol](false)
+        shouldRender = false
+      }).observe(this, { childList: true, attributes: true })
+    }
+
     // Once connected, it will keep updating the innerHTML.
     // We could add a render method to allow this as well.
     this[shouldRenderSymbol] = true
@@ -184,6 +194,7 @@ export const flattenIfOne = (arr: unknown) => {
  */
 export const convertNamedNodeMapToObject = (namedNodeMap: NamedNodeMap) => {
   const object: Record<string, string> = {}
+  if (!namedNodeMap) return {}
   Array.from(namedNodeMap).map(({ name, value }) => (object[name] = value))
   return object
 }
@@ -195,15 +206,14 @@ export const convertToReactChildren = (
   React: typeof ReactNamespace,
   node: HTMLElement
 ) => {
-  if (node.nodeType === Node.TEXT_NODE) {
-    return node.textContent?.toString()
-  }
+  if (node.nodeType === Node.TEXT_NODE) return node.textContent?.toString()
+  if (node.nodeType === Node.COMMENT_NODE) return ''
 
   return flattenIfOne(
     Array.from(node.childNodes).map((c) => {
-      if (c.nodeType === Node.TEXT_NODE) {
-        return c.textContent?.toString()
-      }
+      if (c.nodeType === Node.TEXT_NODE) return c.textContent?.toString()
+      if (c.nodeType === Node.COMMENT_NODE) return ''
+
       const nodeName = isAllCaps(c.nodeName)
         ? c.nodeName.toLowerCase()
         : c.nodeName
