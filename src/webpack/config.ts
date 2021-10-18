@@ -2,6 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import * as webpack from 'webpack'
 import { merge } from 'webpack-merge'
+import ts from 'typescript'
 
 import TerserPlugin from 'terser-webpack-plugin'
 import { ModifySourcePlugin } from 'modify-source-webpack-plugin'
@@ -11,18 +12,29 @@ import {
   resolveTsconfigPathsToAlias,
   tempPath
 } from './utils'
+import { IFrontbookConfig } from '../'
 
 // * Project Package Json
-const packageJsonPath = path.resolve(process.cwd(), 'package.json')
-const packageJson = fs.existsSync(packageJsonPath)
+export const packageJsonPath = path.resolve(process.cwd(), 'package.json')
+export const packageJson = fs.existsSync(packageJsonPath)
   ? require(packageJsonPath)
   : {}
 
 // * Project Webpack Config
-const projectConfigPath = path.resolve(process.cwd(), 'webpack.config.js')
-const projectConfig = fs.existsSync(projectConfigPath)
-  ? require(projectConfigPath)
+export const projectConfigPath = path.resolve(
+  process.cwd(),
+  'frontbook.config.ts'
+)
+export const projectConfig: IFrontbookConfig = fs.existsSync(projectConfigPath)
+  ? eval(ts.transpile(String(fs.readFileSync(projectConfigPath)))) ?? {}
   : {}
+
+export const projectScriptFileName = `${packageJson.name}-${packageJson.version}.js`
+export const projectScriptFilePath = path.resolve(
+  process.cwd(),
+  '.frontbook',
+  projectScriptFileName
+)
 
 // * Auto generate entry file
 createComponentIndex()
@@ -36,7 +48,7 @@ const config: webpack.Configuration = {
   },
   output: {
     path: path.resolve(process.cwd(), '.frontbook'),
-    filename: `${packageJson.name}-${packageJson.version}.js`
+    filename: projectScriptFileName
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
@@ -107,4 +119,4 @@ const config: webpack.Configuration = {
   }
 }
 
-export default merge(config, projectConfig)
+export default merge(config, projectConfig.webpack!)

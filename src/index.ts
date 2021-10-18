@@ -1,4 +1,5 @@
 import { IContiComponent, IContiDemoProps } from './interface'
+import type { Configuration } from 'webpack'
 
 declare const window: Window & {
   frontbook: {
@@ -16,4 +17,17 @@ export const demo = (props: IContiDemoProps) => {
       component
     })
   }
+}
+export interface IFrontbookConfig {
+  title?: string
+  subtitle?: string
+  description?: string
+  mainColor?: string
+  scriptName?: string
+  docs?: {
+    [docTitle: string]: string
+  }
+
+  port?: number
+  webpack?: Configuration
 }

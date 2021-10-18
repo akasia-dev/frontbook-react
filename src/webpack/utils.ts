@@ -1,6 +1,8 @@
 import path from 'path'
 import fs from 'fs'
+import fsPromise from 'fs/promises'
 import glob from 'fast-glob'
+import { projectConfig } from './config'
 
 /**
  * Resolve tsconfig.json paths to Webpack aliases
@@ -106,14 +108,71 @@ export const createComponentIndex = () => {
       )
     })
 
+  let additionalCode = ''
+  if (projectConfig.title)
+    additionalCode += `  window.frontbook.title = '${projectConfig.title}'\n`
+  if (projectConfig.subtitle)
+    additionalCode += `  window.frontbook.subtitle = '${projectConfig.subtitle}'\n`
+  if (projectConfig.description)
+    additionalCode += `  window.frontbook.description = '${projectConfig.description}'\n`
+  if (projectConfig.mainColor)
+    additionalCode += `  window.frontbook.mainColor = '${projectConfig.mainColor}'\n`
+  if (projectConfig.scriptName)
+    additionalCode += `  window.frontbook.scriptName = '${projectConfig.scriptName}'\n`
+
+  if (projectConfig.docs)
+    additionalCode += `  window.frontbook.docs = ${JSON.stringify(
+      projectConfig.docs
+    )}\n`
+
   fs.writeFileSync(
     path.resolve(tempPath, 'index.ts'),
     `${injectIndexCode}\n${components.join('\n\n')}\n\n${demoFunctions.join(
       '\n\n'
-    )}`
+    )}${
+      additionalCode.length > 0
+        ? `\n\nif (typeof window !== "undefined") {${additionalCode}}`
+        : ``
+    }`
   )
 }
 
 export const removeComponentIndex = () => {
   fs.rmSync(tempPath, { recursive: true, force: true })
 }
+
+export const copyDir = async (src: string, dest: string) => {
+  await fsPromise.mkdir(dest, { recursive: true })
+  let entries = await fsPromise.readdir(src, { withFileTypes: true })
+
+  for (let entry of entries) {
+    let srcPath = path.join(src, entry.name)
+    let destPath = path.join(dest, entry.name)
+
+    entry.isDirectory()
+      ? await copyDir(srcPath, destPath)
+      : await fsPromise.copyFile(srcPath, destPath)
+  }
+}
+
+export const nodeModuleContiPath = path.resolve(
+  process.cwd(),
+  'node_modules',
+  'frontbook-react',
+  'node_modules',
+  'frontbook-conti-dist',
+  'out'
+)
+
+export const projectContiPath = path.resolve(
+  process.cwd(),
+  '.frontbook',
+  'conti'
+)
+
+export const projectContiScriptFilePath = path.resolve(
+  process.cwd(),
+  '.frontbook',
+  'conti',
+  'component.js'
+)

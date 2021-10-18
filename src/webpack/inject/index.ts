@@ -25,6 +25,13 @@ export interface IFrontbook {
     props?: Record<string, any>
     useEffect: UseEffectType
   }) => unknown
+
+  title?: string
+  subtitle?: string
+  description?: string
+  mainColor?: string
+  scriptName?: string
+  docs?: Record<string, string>
 }
 
 declare const window: Window & {

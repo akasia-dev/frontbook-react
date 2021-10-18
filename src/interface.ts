@@ -6,6 +6,15 @@ export interface IContiDemoProps {
   renderWrapper?: (props: IContiStoreComponentValue) => JSX.Element
   children?: string
   documentUrl?: string
+  /**
+   * Maximum size is 12.
+   * The default value is 6.
+   */
+  w?: number
+  /**
+   * The default value is 6.
+   */
+  h?: number
 }
 
 export interface IContiComponent {
@@ -18,6 +27,8 @@ export interface IContiComponent {
   renderWrapper?: (props: IContiStoreComponentValue) => JSX.Element
   children?: string
   documentUrl?: string
+  w?: number
+  h?: number
 }
 
 export type ContiComponentPropType = 'string' | 'number' | 'boolean' | 'select'
