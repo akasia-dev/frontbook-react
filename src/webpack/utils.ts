@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import fsPromise from 'fs/promises'
 import glob from 'fast-glob'
-import { projectConfig } from './config'
+import { projectConfig, projectEntryPath } from './config'
 
 /**
  * Resolve tsconfig.json paths to Webpack aliases
@@ -125,6 +125,10 @@ export const createComponentIndex = () => {
       projectConfig.docs
     )}\n`
 
+  let entryInjectCode = fs.existsSync(projectEntryPath)
+    ? `\n\nimport '../../frontbook.entry'\n`
+    : ``
+
   fs.writeFileSync(
     path.resolve(tempPath, 'index.ts'),
     `${injectIndexCode}\n${components.join('\n\n')}\n\n${demoFunctions.join(
@@ -133,7 +137,7 @@ export const createComponentIndex = () => {
       additionalCode.length > 0
         ? `\n\nif (typeof window !== "undefined") {${additionalCode}}`
         : ``
-    }`
+    }${entryInjectCode}`
   )
 }
 
