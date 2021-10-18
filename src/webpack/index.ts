@@ -13,6 +13,7 @@ import path from 'path'
 import { serve } from '../static/server'
 
 export const installContiDist = async () => {
+  process.env.FRONTBOOK = 'true'
   if (!fs.existsSync(path.resolve(projectContiPath, 'index.html'))) {
     if (fs.existsSync(nodeModuleContiPath)) {
       await copyDir(nodeModuleContiPath, projectContiPath)
