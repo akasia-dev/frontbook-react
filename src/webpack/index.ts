@@ -3,6 +3,7 @@ import config, { projectConfig, projectScriptFilePath } from './config'
 import {
   copyDir,
   nodeModuleContiPath,
+  nodeModuleContiForDevPath,
   projectContiPath,
   projectContiScriptFilePath,
   removeComponentIndex
@@ -11,10 +12,18 @@ import fs from 'fs'
 import path from 'path'
 import { serve } from '../static/server'
 
-export const exportScript = async () => {
-  if (!fs.existsSync(path.resolve(projectContiPath, 'index.html')))
-    await copyDir(nodeModuleContiPath, projectContiPath)
+export const installContiDist = async () => {
+  if (!fs.existsSync(path.resolve(projectContiPath, 'index.html'))) {
+    if (fs.existsSync(nodeModuleContiPath)) {
+      await copyDir(nodeModuleContiPath, projectContiPath)
+    } else if (fs.existsSync(nodeModuleContiForDevPath)) {
+      await copyDir(nodeModuleContiForDevPath, projectContiPath)
+    }
+  }
+}
 
+export const exportScript = async () => {
+  await installContiDist()
   return webpack(config).run((error, stats) => {
     if (error) console.error(error)
     if (stats)
@@ -35,8 +44,7 @@ export const exportScript = async () => {
 }
 
 export const watchScript = async () => {
-  if (!fs.existsSync(path.resolve(projectContiPath, 'index.html')))
-    await copyDir(nodeModuleContiPath, projectContiPath)
+  await installContiDist()
 
   process.on('SIGINT', () => {
     removeComponentIndex()
@@ -68,8 +76,7 @@ export const watchScript = async () => {
 }
 
 export const devScript = async () => {
-  if (!fs.existsSync(path.resolve(projectContiPath, 'index.html')))
-    await copyDir(nodeModuleContiPath, projectContiPath)
+  await installContiDist()
 
   process.on('SIGINT', () => {
     removeComponentIndex()

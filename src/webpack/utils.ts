@@ -158,6 +158,13 @@ export const copyDir = async (src: string, dest: string) => {
 export const nodeModuleContiPath = path.resolve(
   process.cwd(),
   'node_modules',
+  'frontbook-conti-dist',
+  'out'
+)
+
+export const nodeModuleContiForDevPath = path.resolve(
+  process.cwd(),
+  'node_modules',
   'frontbook-react',
   'node_modules',
   'frontbook-conti-dist',
