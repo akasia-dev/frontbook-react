@@ -35,7 +35,7 @@
     "@babel/preset-react": "^7.14.5",
     "babel-loader": "^8.2.2",
     "babel-plugin-typescript-to-proptypes": "^1.4.2",
-    "boxen": "^6.2.1",
+    "boxen": "^5.1.2",
     "chalk": "^4.1.2",
     "cors": "^2.8.5",
     "eslint": "^7.32.0",
