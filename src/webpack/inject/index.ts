@@ -97,9 +97,28 @@ if (typeof window !== 'undefined' && typeof window.frontbook === 'undefined') {
       window.customElements.define(name, ExtendedElement)
       return true
     },
-    update: async (name: string, updater: UpdaterType) => {
-      const components = window.frontbook.instances[name]
-      for (const component of components) await updater(component)
+    update: async (
+      name: string,
+      updater: UpdaterType,
+      props?: { immediately: boolean }
+    ) => {
+      const update = async () => {
+        if (
+          window.frontbook === undefined ||
+          window.frontbook.instances === undefined ||
+          typeof window.frontbook.instances[name] === 'undefined'
+        )
+          return
+        const components = window.frontbook.instances[name]
+        if (!Array.isArray(components) || components.length === 0) return
+        for (const component of components) await updater(component)
+      }
+
+      if (props?.immediately) {
+        await update()
+      } else {
+        setTimeout(update, 0)
+      }
     }
   }
 }
