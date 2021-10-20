@@ -51,7 +51,13 @@ export const createComponentIndex = () => {
         .replace(/\.[^/.]+$/, '')
 
       const pathSplit = componentFilePath.split('/')
-      const kebabCaseName = pathSplit[pathSplit.length - 1]
+      let kebabCaseName = pathSplit[pathSplit.length - 1]
+        .match(
+          /[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g
+        )
+        ?.map((x) => x.toLowerCase())
+        .join('-')
+
       let pascalCaseName = pathSplit[pathSplit.length - 1].replace(
         /[-_]([a-z])/g,
         (_, letter) => letter.toUpperCase()
@@ -93,6 +99,11 @@ export const createComponentIndex = () => {
 
       const pathSplit = demoFunctionFilePath.replace(/\.[^/.]+$/, '').split('/')
       const kebabCaseName = pathSplit[pathSplit.length - 1]
+        .match(
+          /[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g
+        )
+        ?.map((x) => x.toLowerCase())
+        .join('-')
       let pascalCaseName = pathSplit[pathSplit.length - 1].replace(
         /[-_]([a-z])/g,
         (_, letter) => letter.toUpperCase()
