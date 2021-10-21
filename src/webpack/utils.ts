@@ -37,7 +37,10 @@ export const resolveTsconfigPathsToAlias = ({
 export const tempPath = path.resolve(process.cwd(), '.frontbook/build')
 
 export const createComponentIndex = () => {
-  const componentPath = path.resolve(process.cwd(), 'component')
+  const componentPath = path.resolve(
+    process.cwd(),
+    projectConfig.componentFolderName ?? 'component'
+  )
 
   fs.mkdirSync(tempPath, { recursive: true })
 
