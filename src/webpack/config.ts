@@ -124,4 +124,4 @@ const config: webpack.Configuration = {
   }
 }
 
-export default merge(config, projectConfig.webpack!)
+export default merge(config, projectConfig.webpack ?? {})

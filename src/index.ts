@@ -27,6 +27,7 @@ export interface IFrontbookConfig {
   description?: string
   mainColor?: string
   scriptName?: string
+  componentFolderName?: string
   docs?: {
     [docTitle: string]: string
   }

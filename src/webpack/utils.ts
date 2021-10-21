@@ -66,7 +66,9 @@ export const createComponentIndex = () => {
         match.toUpperCase()
       )
 
-      const componentImportPath = `component${componentFilePath}`
+      const componentImportPath = `${
+        projectConfig.componentFolderName ?? 'component'
+      }${componentFilePath}`
       return (
         `import ${pascalCaseName} from '${componentImportPath}'\n` +
         `registerComponent('${kebabCaseName}', ${pascalCaseName})`
@@ -112,7 +114,9 @@ export const createComponentIndex = () => {
         match.toUpperCase()
       )
 
-      const componentImportPath = `component${demoFunctionFilePath}`
+      const componentImportPath = `${
+        projectConfig.componentFolderName ?? 'component'
+      }${demoFunctionFilePath}`
 
       // This is an exception to the possibility that only demonstrations exist and there are no components.
       const actualComponentVariable = `eval(\`typeof ${pascalCaseName} !== 'undefined' ? ${pascalCaseName} : undefined\`)`

@@ -11,7 +11,8 @@
     "build": "rm -rf dist && tsc",
     "clean": "rm -rf dist && rm -rf test-e2e",
     "lint": "prettier --write ./src/**/*.ts",
-    "release": "release-it"
+    "release": "release-it",
+    "prestart": "npx prestart"
   },
   "repository": {
     "type": "git",
