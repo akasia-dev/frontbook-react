@@ -8,9 +8,11 @@ declare const window: Window & {
 }
 
 export const demo = (props: IContiDemoProps) => {
-  return (name: string, component: (...args) => JSX.Element) => {
+  return (name: string, component?: (...args) => JSX.Element) => {
     if (typeof window === 'undefined') return
+    if (typeof window.frontbook === 'undefined') (window as any).frontbook = {}
     if (typeof window.frontbook.demo === 'undefined') window.frontbook.demo = []
+
     window.frontbook.demo.push({
       ...props,
       name,
@@ -18,6 +20,7 @@ export const demo = (props: IContiDemoProps) => {
     })
   }
 }
+
 export interface IFrontbookConfig {
   title?: string
   subtitle?: string

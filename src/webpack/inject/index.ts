@@ -25,6 +25,7 @@ export interface IFrontbook {
     props?: Record<string, any>
     useEffect: UseEffectType
   }) => unknown
+  registerComponent: (kebabName: string, component: any) => void
 
   title?: string
   subtitle?: string
@@ -34,15 +35,31 @@ export interface IFrontbook {
   docs?: Record<string, string>
 }
 
-declare const window: Window & {
-  frontbook: IFrontbook
+declare const window: any
+
+export const registerComponent = (kebabName: string, component: any) => {
+  if (
+    typeof window !== 'undefined' &&
+    typeof window.customElements !== 'undefined' &&
+    typeof component !== 'undefined'
+  ) {
+    const element = reactToWebComponent(component, React, ReactDOM, {
+      shadow: false
+    }) as any
+    window.customElements.define(kebabName, element)
+    window.frontbook.elements[kebabName] = element
+  }
 }
 
-if (typeof window !== 'undefined' && typeof window.frontbook === 'undefined') {
-  window.frontbook = {
-    instances: {},
-    elements: {},
-    react: ({
+if (typeof window !== 'undefined') {
+  if (typeof window.frontbook === 'undefined') window.frontbook = {}
+  if (typeof window.frontbook.instances === 'undefined')
+    window.frontbook.instances = {}
+  if (typeof window.frontbook.elements === 'undefined')
+    window.frontbook.elements = {}
+
+  if (typeof window.frontbook.react === 'undefined')
+    window.frontbook.react = ({
       name,
       props,
       useEffect
@@ -96,8 +113,10 @@ if (typeof window !== 'undefined' && typeof window.frontbook === 'undefined') {
 
       window.customElements.define(name, ExtendedElement)
       return true
-    },
-    update: async (
+    }
+
+  if (typeof window.frontbook.update === 'undefined') {
+    window.frontbook.update = async (
       name: string,
       updater: UpdaterType,
       props?: { immediately: boolean }
@@ -121,18 +140,7 @@ if (typeof window !== 'undefined' && typeof window.frontbook === 'undefined') {
       }
     }
   }
-}
 
-export const registerComponent = (kebabName: string, component: any) => {
-  if (
-    typeof window !== 'undefined' &&
-    typeof window.customElements !== 'undefined' &&
-    typeof component !== 'undefined'
-  ) {
-    const element = reactToWebComponent(component, React, ReactDOM, {
-      shadow: false
-    }) as any
-    window.customElements.define(kebabName, element)
-    window.frontbook.elements[kebabName] = element
-  }
+  if (typeof window.frontbook.registerComponent === 'undefined')
+    window.frontbook.registerComponent = registerComponent
 }
