@@ -115,7 +115,7 @@ export const createComponentIndex = () => {
       const componentImportPath = `component${demoFunctionFilePath}`
 
       // This is an exception to the possibility that only demonstrations exist and there are no components.
-      const actualComponentVariable = `eval(\`typeof ${pascalCaseName} !== 'undefined' ? ${pascalCaseName} : undefined)\``
+      const actualComponentVariable = `eval(\`typeof ${pascalCaseName} !== 'undefined' ? ${pascalCaseName} : undefined\`)`
       return (
         `import ${pascalCaseName}DemoFunction from '${componentImportPath}'\n` +
         `${pascalCaseName}DemoFunction('${kebabCaseName}', ${actualComponentVariable})`
@@ -149,7 +149,7 @@ export const createComponentIndex = () => {
       '\n\n'
     )}${
       additionalCode.length > 0
-        ? `\n\nif (typeof window !== "undefined") {${additionalCode}}`
+        ? `\n\nif (typeof window !== "undefined") {\n${additionalCode}}`
         : ``
     }${entryInjectCode}`
   )
