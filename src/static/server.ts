@@ -1,9 +1,9 @@
-import Express from 'express'
-import NestedStatic from 'nested-static'
-import CORS from 'cors'
+import express from 'express'
+import cors from 'cors'
 import http from 'http'
 import boxen from 'boxen'
 import chalk from 'chalk'
+import nestedStatic from 'nested-static'
 
 export const serve = async ({
   publicPath,
@@ -12,24 +12,23 @@ export const serve = async ({
   publicPath: string
   httpPort: string
 }) => {
-  const expressInstance = Express()
-  expressInstance.use(CORS())
+  const expressInstance = express()
+  expressInstance.use(cors())
 
   // Register Static Files
-  NestedStatic(publicPath, (folders) => {
-    for (let { staticPath, subPath } of folders)
-      expressInstance.use(subPath, Express.static(staticPath))
-  })
+  nestedStatic(publicPath, (folders) =>
+    folders.map(({ staticPath, subPath }) =>
+      expressInstance.use(subPath, express.static(staticPath))
+    )
+  )
 
-  const httpServer = http.createServer(expressInstance)
-  httpServer.listen(httpPort, () => {
+  http.createServer(expressInstance).listen(httpPort, () => {
     console.log(
-      '\n' +
-        chalk.green(
-          boxen(`Frontbook Online!\nhttp://localhost:${httpPort}`, {
-            padding: 1
-          })
-        )
+      `\n${chalk.green(
+        boxen(`Frontbook Online!\nhttp://localhost:${httpPort}`, {
+          padding: 1
+        })
+      )}`
     )
   })
 }

@@ -63,7 +63,9 @@ export const createComponentIndex = () => {
       const componentImportPath = `component${componentFilePath}`
       return (
         `import ${pascalCaseName} from '${componentImportPath}'\n` +
-        `registerComponent('${kebabCaseName}', ${pascalCaseName})`
+        `try {` +
+        `  registerComponent('${kebabCaseName}', ${pascalCaseName})` +
+        `} catch (e) {}`
       )
     })
 
@@ -104,7 +106,9 @@ export const createComponentIndex = () => {
       const componentImportPath = `component${demoFunctionFilePath}`
       return (
         `import ${pascalCaseName}DemoFunction from '${componentImportPath}'\n` +
-        `${pascalCaseName}DemoFunction('${kebabCaseName}', ${pascalCaseName})`
+        `try {` +
+        `  ${pascalCaseName}DemoFunction('${kebabCaseName}', ${pascalCaseName})` +
+        `} catch (e) {}`
       )
     })
 
