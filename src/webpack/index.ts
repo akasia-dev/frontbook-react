@@ -110,7 +110,12 @@ export const devScript = async () => {
       if (!isInited) {
         serve({
           httpPort: String(projectConfig.port) ?? '5000',
-          publicPath: projectContiPath
+          publicPaths: [
+            projectContiPath,
+            ...(projectConfig.publicServePaths?.map((publicServePath) =>
+              path.resolve(process.cwd(), publicServePath)
+            ) || [])
+          ]
         })
         isInited = true
       }

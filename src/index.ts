@@ -87,4 +87,13 @@ export interface IFrontbookConfig {
 
   disableDefaultWebpackConfig?: boolean
   disablePreactInjection?: boolean
+
+  /**
+   * Folder path target to be served
+   * to public on the demo server.
+   *
+   * @example
+   * ['./public']
+   */
+  publicServePaths?: string[]
 }
