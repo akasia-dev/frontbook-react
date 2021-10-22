@@ -73,7 +73,7 @@ export const createComponentIndex = () => {
         projectConfig.componentFolderName ?? 'component'
       }${componentFilePath}`
 
-      if (projectConfig?.ignnoreComponents?.includes(componentImportPath))
+      if (projectConfig?.ignoreComponents?.includes(componentImportPath))
         return null
 
       return (

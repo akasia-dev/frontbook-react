@@ -83,7 +83,7 @@ export interface IFrontbookConfig {
    *   'component/PrimaryButton'
    * ]
    */
-  ignnoreComponents?: string[]
+  ignoreComponents?: string[]
 
   disableDefaultWebpackConfig?: boolean
   disablePreactInjection?: boolean
