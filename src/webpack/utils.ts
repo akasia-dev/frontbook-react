@@ -72,6 +72,10 @@ export const createComponentIndex = () => {
       const componentImportPath = `${
         projectConfig.componentFolderName ?? 'component'
       }${componentFilePath}`
+
+      if (projectConfig?.ignnoreComponents?.includes(componentImportPath))
+        return null
+
       return (
         `import ${pascalCaseName} from '${componentImportPath}'\n` +
         `try {` +
@@ -79,6 +83,7 @@ export const createComponentIndex = () => {
         `} catch (e) {}`
       )
     })
+    .filter((x) => x !== null) as string[]
 
   const injectCodeFolderPath = path.resolve(
     __dirname,

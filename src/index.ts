@@ -80,7 +80,7 @@ export interface IFrontbookConfig {
    * List of demo components to be not bundled.
    * @example
    * [
-   *   'component/PrimaryButton.tsx'
+   *   'component/PrimaryButton'
    * ]
    */
   ignnoreComponents: string[]
