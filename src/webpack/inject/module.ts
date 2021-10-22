@@ -104,8 +104,10 @@ export const ReactWebComponent = (
     if (this[shouldRenderSymbol] === true) {
       const data = {}
       if (ReactComponent.propTypes) {
+        const propTypes = Object.keys(ReactComponent.propTypes) ?? []
         Object.keys(this).forEach((key) => {
-          if (renderAddedProperties[key] !== false) data[key] = this[key]
+          if (propTypes.includes(key) && renderAddedProperties[key] !== false)
+            data[key] = this[key]
         }, this)
       }
       rendering = true
