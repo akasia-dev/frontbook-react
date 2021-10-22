@@ -1,6 +1,11 @@
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import { exportScript, watchScript, devScript } from './webpack'
+import {
+  exportScript,
+  watchScript,
+  devScript,
+  createWebpackDevServer
+} from './webpack'
 
 yargs(hideBin(process.argv))
   .scriptName('frontbook-react')
@@ -17,6 +22,7 @@ yargs(hideBin(process.argv))
     'Turn on the component test page server. And Whenever the source code changes, a webpack result is generated.',
     () => devScript()
   )
+  .command('internal-worker', 'Process Only', () => createWebpackDevServer())
   .version('1.0.0')
   .demandCommand()
   .help()

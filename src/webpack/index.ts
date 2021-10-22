@@ -10,7 +10,11 @@ import {
 } from './utils'
 import fs from 'fs'
 import path from 'path'
-import { serve } from '../static/server'
+import WebpackDevServer from 'webpack-dev-server'
+import boxen from 'boxen'
+import chalk from 'chalk'
+import chokidar from 'chokidar'
+import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
 
 export const installContiDist = async () => {
   process.env.FRONTBOOK = 'true'
@@ -76,6 +80,54 @@ export const watchScript = async () => {
   )
 }
 
+export const createWebpackDevServer = (callback?: () => unknown) => {
+  const compiler = webpack(config)
+  compiler.watch(
+    {
+      aggregateTimeout: 300,
+      poll: 1000
+    },
+    () => {
+      if (fs.existsSync(projectScriptFilePath))
+        fs.copyFileSync(projectScriptFilePath, projectContiScriptFilePath)
+    }
+  )
+
+  const httpPort = String(projectConfig.port) ?? '5000'
+  const server = new WebpackDevServer(
+    {
+      open: false,
+      compress: true,
+      port: httpPort,
+      liveReload: true,
+      hot: true,
+      devMiddleware: {
+        writeToDisk: true
+      },
+      static: [
+        projectContiPath,
+        ...(projectConfig.publicServePaths?.map((publicServePath) =>
+          path.resolve(process.cwd(), publicServePath)
+        ) || [])
+      ]
+    },
+    compiler
+  )
+
+  server.startCallback(() => {
+    console.log(
+      `\n${chalk.green(
+        boxen(`Frontbook Online!\nhttp://localhost:${httpPort}`, {
+          padding: 1
+        })
+      )}`
+    )
+    if (callback) callback()
+  })
+
+  return { compiler, server }
+}
+
 export const devScript = async () => {
   await installContiDist()
 
@@ -84,41 +136,42 @@ export const devScript = async () => {
     process.exit(0)
   })
 
-  let isInited = false
-
-  return webpack(config).watch(
-    {
-      aggregateTimeout: 300,
-      poll: undefined
-    },
-    (error, stats) => {
-      if (error) console.error(error)
-      if (stats)
-        process.stdout.write(
-          stats.toString({
-            colors: true,
-            modules: false,
-            children: false,
-            chunks: false,
-            chunkModules: false
-          }) + '\n'
-        )
-
-      if (fs.existsSync(projectScriptFilePath))
-        fs.copyFileSync(projectScriptFilePath, projectContiScriptFilePath)
-
-      if (!isInited) {
-        serve({
-          httpPort: String(projectConfig.port) ?? '5000',
-          publicPaths: [
-            projectContiPath,
-            ...(projectConfig.publicServePaths?.map((publicServePath) =>
-              path.resolve(process.cwd(), publicServePath)
-            ) || [])
-          ]
-        })
-        isInited = true
-      }
-    }
+  const componentPath = path.resolve(
+    process.cwd(),
+    projectConfig.componentFolderName ?? 'component'
   )
+
+  let child: ChildProcessWithoutNullStreams | null = null
+  const reset = async () => {
+    if (child) child.kill('SIGINT')
+
+    child = spawn('frontbook-react', ['internal-worker', '--color=always'], {
+      stdio: 'pipe',
+      cwd: process.cwd()
+    })
+    child.stdout?.pipe(process.stdout)
+    child.stderr?.pipe(process.stderr)
+  }
+
+  chokidar
+    .watch(componentPath, { awaitWriteFinish: true, ignoreInitial: true })
+    .on('add', (filePath) => {
+      console.log(
+        `\n\n` +
+          chalk.green(
+            `A new file has been detected. Refresh the web pack.\n(Path: ${filePath})`
+          )
+      )
+      reset()
+    })
+    .on('unlink', (filePath) => {
+      console.log(
+        `\n\n` +
+          chalk.green(
+            `File deletion detected. Refresh the web pack.\n(Path: ${filePath})`
+          )
+      )
+      reset()
+    })
+  reset()
 }
