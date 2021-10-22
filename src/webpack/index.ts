@@ -85,19 +85,21 @@ export const watchScript = async () => {
 
 export const createWebpackDevServer = (callback?: () => unknown) => {
   const compiler = webpack(
-    merge(config, {
-      entry: {
-        app: [
-          'webpack-dev-server/client/index.js?hot=true&live-reload=true',
-          path.join(tempPath, 'index.ts')
-        ]
-      },
-      output: {
-        hotUpdateChunkFilename: 'build/hot-update.js',
-        hotUpdateMainFilename: 'build/hot-update.json'
-      },
-      plugins: [new webpack.HotModuleReplacementPlugin()]
-    })
+    projectConfig.disableHMR !== true
+      ? merge(config, {
+          entry: {
+            app: [
+              'webpack-dev-server/client/index.js?hot=true&live-reload=true',
+              path.join(tempPath, 'index.ts')
+            ]
+          },
+          output: {
+            hotUpdateChunkFilename: 'build/hot-update.js',
+            hotUpdateMainFilename: 'build/hot-update.json'
+          },
+          plugins: [new webpack.HotModuleReplacementPlugin()]
+        })
+      : config
   )
 
   let isFirstCompile = true
@@ -132,7 +134,7 @@ export const createWebpackDevServer = (callback?: () => unknown) => {
       open: false,
       compress: true,
       port: httpPort,
-      liveReload: true,
+      liveReload: projectConfig.disableHMR !== true,
       hot: false,
       devMiddleware: {
         writeToDisk: true
@@ -176,25 +178,27 @@ export const devScript = async () => {
     })
   }
 
-  chokidar
-    .watch(componentPath, { awaitWriteFinish: true, ignoreInitial: true })
-    .on('add', (filePath) => {
-      console.log(
-        `\n\n` +
-          chalk.green(
-            `A new file has been detected. Refresh the webpack.\n(Path: ${filePath})\n`
-          )
-      )
-      reset()
-    })
-    .on('unlink', (filePath) => {
-      console.log(
-        `\n\n` +
-          chalk.green(
-            `File deletion detected. Refresh the webpack.\n(Path: ${filePath})\n`
-          )
-      )
-      reset()
-    })
+  if (projectConfig.disableHMR !== true) {
+    chokidar
+      .watch(componentPath, { awaitWriteFinish: true, ignoreInitial: true })
+      .on('add', (filePath) => {
+        console.log(
+          `\n\n` +
+            chalk.green(
+              `A new file has been detected. Refresh the webpack.\n(Path: ${filePath})\n`
+            )
+        )
+        reset()
+      })
+      .on('unlink', (filePath) => {
+        console.log(
+          `\n\n` +
+            chalk.green(
+              `File deletion detected. Refresh the webpack.\n(Path: ${filePath})\n`
+            )
+        )
+        reset()
+      })
+  }
   reset()
 }

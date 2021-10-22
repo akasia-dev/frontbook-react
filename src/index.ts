@@ -85,8 +85,18 @@ export interface IFrontbookConfig {
    */
   ignoreComponents?: string[]
 
+  /**
+   * @default false
+   */
   disableDefaultWebpackConfig?: boolean
+  /**
+   * @default false
+   */
   disablePreactInjection?: boolean
+  /**
+   * @default false
+   */
+  disableHMR?: boolean
 
   /**
    * Folder path target to be served
