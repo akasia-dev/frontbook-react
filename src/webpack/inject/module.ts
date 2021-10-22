@@ -103,9 +103,11 @@ export const ReactWebComponent = (
   targetPrototype[renderSymbol] = function (isConnectInit = false) {
     if (this[shouldRenderSymbol] === true) {
       const data = {}
-      Object.keys(this).forEach((key) => {
-        if (renderAddedProperties[key] !== false) data[key] = this[key]
-      }, this)
+      if (ReactComponent.propTypes) {
+        Object.keys(this).forEach((key) => {
+          if (renderAddedProperties[key] !== false) data[key] = this[key]
+        }, this)
+      }
       rendering = true
       Array.from(this.attributes as NamedNodeMap).forEach((attr) => {
         if (attr) data[attr.name] = attr.nodeValue
