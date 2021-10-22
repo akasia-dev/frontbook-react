@@ -6,7 +6,8 @@ import {
   nodeModuleContiForDevPath,
   projectContiPath,
   projectContiScriptFilePath,
-  removeComponentIndex
+  removeComponentIndex,
+  tempPath
 } from './utils'
 import fs from 'fs'
 import path from 'path'
@@ -14,7 +15,9 @@ import WebpackDevServer from 'webpack-dev-server'
 import boxen from 'boxen'
 import chalk from 'chalk'
 import chokidar from 'chokidar'
-import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
+import { ChildProcessByStdio, spawn } from 'child_process'
+import { Readable } from 'stream'
+import merge from 'webpack-merge'
 
 export const installContiDist = async () => {
   process.env.FRONTBOOK = 'true'
@@ -81,7 +84,19 @@ export const watchScript = async () => {
 }
 
 export const createWebpackDevServer = (callback?: () => unknown) => {
-  const compiler = webpack(config)
+  const compiler = webpack(
+    merge(config, {
+      entry: {
+        app: [
+          'webpack-dev-server/client/index.js?hot=true&live-reload=true',
+          path.join(tempPath, 'index.ts')
+        ]
+      },
+      plugins: [new webpack.HotModuleReplacementPlugin()]
+    })
+  )
+
+  let isFirstCompile = true
   compiler.watch(
     {
       aggregateTimeout: 300,
@@ -90,6 +105,20 @@ export const createWebpackDevServer = (callback?: () => unknown) => {
     () => {
       if (fs.existsSync(projectScriptFilePath))
         fs.copyFileSync(projectScriptFilePath, projectContiScriptFilePath)
+
+      setTimeout(() => {
+        console.log(
+          `\n${chalk.green(
+            boxen(`Frontbook Online!\nhttp://localhost:${httpPort}`, {
+              padding: 1
+            })
+          )}\n`
+        )
+      }, 100)
+
+      if (isFirstCompile) {
+        isFirstCompile = false
+      }
     }
   )
 
@@ -100,7 +129,7 @@ export const createWebpackDevServer = (callback?: () => unknown) => {
       compress: true,
       port: httpPort,
       liveReload: true,
-      hot: true,
+      hot: false,
       devMiddleware: {
         writeToDisk: true
       },
@@ -115,13 +144,6 @@ export const createWebpackDevServer = (callback?: () => unknown) => {
   )
 
   server.startCallback(() => {
-    console.log(
-      `\n${chalk.green(
-        boxen(`Frontbook Online!\nhttp://localhost:${httpPort}`, {
-          padding: 1
-        })
-      )}`
-    )
     if (callback) callback()
   })
 
@@ -141,16 +163,13 @@ export const devScript = async () => {
     projectConfig.componentFolderName ?? 'component'
   )
 
-  let child: ChildProcessWithoutNullStreams | null = null
+  let child: ChildProcessByStdio<null, null, Readable> | undefined = undefined
   const reset = async () => {
-    if (child) child.kill('SIGINT')
-
-    child = spawn('frontbook-react', ['internal-worker', '--color=always'], {
-      stdio: 'pipe',
+    if (typeof child?.kill === 'function') child?.kill()
+    child = spawn('frontbook-react', ['internal-worker'], {
+      stdio: [process.stdin, process.stdout, 'pipe'],
       cwd: process.cwd()
     })
-    child.stdout?.pipe(process.stdout)
-    child.stderr?.pipe(process.stderr)
   }
 
   chokidar

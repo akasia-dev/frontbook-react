@@ -28,8 +28,7 @@
     "@types/react": "^17.0.27",
     "@types/webpack": "^5.28.0",
     "@types/webpack-dev-server": "^4.3.1",
-    "@types/yargs": "^17.0.3",
-    "webpack-dev-middleware": "^5.2.1"
+    "@types/yargs": "^17.0.3"
   },
   "homepage": "https://github.com/akasia-dev/frontbook-react#readme",
   "dependencies": {
@@ -71,6 +70,8 @@
     "webpack-cli": "^4.8.0",
     "webpack-dev-server": "^4.3.1",
     "webpack-merge": "^5.8.0",
-    "yargs": "^17.2.1"
+    "yargs": "^17.2.1",
+    "webpack-dev-middleware": "^5.2.1",
+    "webpack-hot-middleware": "^2.25.1"
   }
 }

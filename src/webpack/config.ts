@@ -25,11 +25,13 @@ export const projectConfigPath = path.resolve(
   process.cwd(),
   'frontbook.config.ts'
 )
+
 // * Project Webpack Config
 export const projectEntryPath = path.resolve(
   process.cwd(),
   'frontbook.entry.ts'
 )
+
 export const projectConfig: IFrontbookConfig = fs.existsSync(projectConfigPath)
   ? eval(ts.transpile(String(fs.readFileSync(projectConfigPath)))) ?? {}
   : {}
