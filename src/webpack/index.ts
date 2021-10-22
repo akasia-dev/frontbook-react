@@ -92,6 +92,10 @@ export const createWebpackDevServer = (callback?: () => unknown) => {
           path.join(tempPath, 'index.ts')
         ]
       },
+      output: {
+        hotUpdateChunkFilename: 'build/hot-update.js',
+        hotUpdateMainFilename: 'build/hot-update.json'
+      },
       plugins: [new webpack.HotModuleReplacementPlugin()]
     })
   )
@@ -178,7 +182,7 @@ export const devScript = async () => {
       console.log(
         `\n\n` +
           chalk.green(
-            `A new file has been detected. Refresh the web pack.\n(Path: ${filePath})`
+            `A new file has been detected. Refresh the webpack.\n(Path: ${filePath})\n`
           )
       )
       reset()
@@ -187,7 +191,7 @@ export const devScript = async () => {
       console.log(
         `\n\n` +
           chalk.green(
-            `File deletion detected. Refresh the web pack.\n(Path: ${filePath})`
+            `File deletion detected. Refresh the webpack.\n(Path: ${filePath})\n`
           )
       )
       reset()
