@@ -34,6 +34,7 @@ export const projectConfig: IFrontbookConfig = fs.existsSync(projectConfigPath)
   ? eval(ts.transpile(String(fs.readFileSync(projectConfigPath)))) ?? {}
   : {}
 
+// * Bundled Frontbook Script
 export const projectScriptFileName = `${packageJson.name}-${packageJson.version}.js`
 export const projectScriptFilePath = path.resolve(
   process.cwd(),
@@ -58,12 +59,19 @@ const config: webpack.Configuration = {
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
     alias: {
+      // * Override tsconfig.json path to use project path
       ...resolveTsconfigPathsToAlias({
         tsconfigPath: path.resolve(process.cwd(), 'tsconfig.json'),
         webpackConfigBasePath: process.cwd()
       }),
-      react: 'preact/compat',
-      'react-dom': 'preact/compat'
+
+      // * react -> preact
+      ...(projectConfig?.disablePreactInjection === true
+        ? {}
+        : {
+            react: 'preact/compat',
+            'react-dom': 'preact/compat'
+          })
     }
   },
   plugins: [
@@ -124,4 +132,8 @@ const config: webpack.Configuration = {
   }
 }
 
-export default merge(config, projectConfig.webpack!)
+const projectWebpackConfig = projectConfig.webpack ?? {}
+
+export default projectConfig?.disableDefaultWebpackConfig === true
+  ? projectWebpackConfig
+  : merge(config, projectWebpackConfig)

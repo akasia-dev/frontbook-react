@@ -37,7 +37,10 @@ export const resolveTsconfigPathsToAlias = ({
 export const tempPath = path.resolve(process.cwd(), '.frontbook/build')
 
 export const createComponentIndex = () => {
-  const componentPath = path.resolve(process.cwd(), 'component')
+  const componentPath = path.resolve(
+    process.cwd(),
+    projectConfig.componentFolderName ?? 'component'
+  )
 
   fs.mkdirSync(tempPath, { recursive: true })
 
@@ -51,7 +54,13 @@ export const createComponentIndex = () => {
         .replace(/\.[^/.]+$/, '')
 
       const pathSplit = componentFilePath.split('/')
-      const kebabCaseName = pathSplit[pathSplit.length - 1]
+      let kebabCaseName = pathSplit[pathSplit.length - 1]
+        .match(
+          /[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g
+        )
+        ?.map((x) => x.toLowerCase())
+        .join('-')
+
       let pascalCaseName = pathSplit[pathSplit.length - 1].replace(
         /[-_]([a-z])/g,
         (_, letter) => letter.toUpperCase()
@@ -60,7 +69,9 @@ export const createComponentIndex = () => {
         match.toUpperCase()
       )
 
-      const componentImportPath = `component${componentFilePath}`
+      const componentImportPath = `${
+        projectConfig.componentFolderName ?? 'component'
+      }${componentFilePath}`
       return (
         `import ${pascalCaseName} from '${componentImportPath}'\n` +
         `try {` +
@@ -95,6 +106,11 @@ export const createComponentIndex = () => {
 
       const pathSplit = demoFunctionFilePath.replace(/\.[^/.]+$/, '').split('/')
       const kebabCaseName = pathSplit[pathSplit.length - 1]
+        .match(
+          /[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g
+        )
+        ?.map((x) => x.toLowerCase())
+        .join('-')
       let pascalCaseName = pathSplit[pathSplit.length - 1].replace(
         /[-_]([a-z])/g,
         (_, letter) => letter.toUpperCase()
@@ -103,11 +119,16 @@ export const createComponentIndex = () => {
         match.toUpperCase()
       )
 
-      const componentImportPath = `component${demoFunctionFilePath}`
+      const componentImportPath = `${
+        projectConfig.componentFolderName ?? 'component'
+      }${demoFunctionFilePath}`
+
+      // This is an exception to the possibility that only demonstrations exist and there are no components.
+      const actualComponentVariable = `eval(\`typeof ${pascalCaseName} !== 'undefined' ? ${pascalCaseName} : undefined\`)`
       return (
         `import ${pascalCaseName}DemoFunction from '${componentImportPath}'\n` +
         `try {` +
-        `  ${pascalCaseName}DemoFunction('${kebabCaseName}', ${pascalCaseName})` +
+        `  ${pascalCaseName}DemoFunction('${kebabCaseName}', ${actualComponentVariable})` +
         `} catch (e) {}`
       )
     })
@@ -139,7 +160,7 @@ export const createComponentIndex = () => {
       '\n\n'
     )}${
       additionalCode.length > 0
-        ? `\n\nif (typeof window !== "undefined") {${additionalCode}}`
+        ? `\n\nif (typeof window !== "undefined") {\n${additionalCode}}`
         : ``
     }${entryInjectCode}`
   )

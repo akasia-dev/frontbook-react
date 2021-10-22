@@ -1,6 +1,6 @@
 {
   "name": "frontbook-react",
-  "version": "1.1.8",
+  "version": "1.1.16",
   "description": "frontbook's react build module.",
   "main": "./dist/index.js",
   "bin": {
@@ -11,7 +11,8 @@
     "build": "rm -rf dist && tsc",
     "clean": "rm -rf dist && rm -rf test-e2e",
     "lint": "prettier --write ./src/**/*.ts",
-    "release": "release-it"
+    "release": "release-it",
+    "prestart": "npx prestart"
   },
   "repository": {
     "type": "git",
@@ -23,7 +24,7 @@
     "url": "https://github.com/akasia-dev/frontbook-react/issues"
   },
   "devDependencies": {
-    "@types/node": "^16.6.2",
+    "@types/node": "^16.11.1",
     "@types/react": "^17.0.27",
     "@types/webpack": "^5.28.0",
     "@types/yargs": "^17.0.3"
@@ -48,7 +49,7 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "express": "^4.17.1",
     "fast-glob": "^3.2.7",
-    "frontbook-conti-dist": "^1.0.3",
+    "frontbook-conti-dist": "^1.0.4",
     "husky": "^7.0.1",
     "modify-source-webpack-plugin": "^3.0.0",
     "nested-static": "^1.1.0",

@@ -8,9 +8,11 @@ declare const window: Window & {
 }
 
 export const demo = (props: IContiDemoProps) => {
-  return (name: string, component: (...args) => JSX.Element) => {
+  return (name: string, component?: (...args) => JSX.Element) => {
     if (typeof window === 'undefined') return
+    if (typeof window.frontbook === 'undefined') (window as any).frontbook = {}
     if (typeof window.frontbook.demo === 'undefined') window.frontbook.demo = []
+
     window.frontbook.demo.push({
       ...props,
       name,
@@ -47,6 +49,8 @@ export interface IFrontbookConfig {
    * 'frontbook@1.0.0'
    */
   scriptName?: string
+
+  componentFolderName?: string
   /**
    * List of documents link to be displayed
    * at the top right of the demo page.
@@ -71,4 +75,16 @@ export interface IFrontbookConfig {
    * is not to be deleted and will be merged)
    */
   webpack?: Configuration
+
+  /**
+   * List of demo components to be not bundled.
+   * @example
+   * [
+   *   'component/PrimaryButton.tsx'
+   * ]
+   */
+  ignnoreComponents: string[]
+
+  disableDefaultWebpackConfig?: boolean
+  disablePreactInjection?: boolean
 }
