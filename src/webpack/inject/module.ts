@@ -112,8 +112,11 @@ export const ReactWebComponent = (
       }
       rendering = true
       Array.from(this.attributes as NamedNodeMap).forEach((attr) => {
+        if (attr.name === 'style') return
         if (attr) data[attr.name] = attr.nodeValue
       })
+
+      this.style.display = 'contents'
 
       setTimeout(() => {
         let children
