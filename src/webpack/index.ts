@@ -103,6 +103,7 @@ export const createWebpackDevServer = (callback?: () => unknown) => {
   )
 
   let isFirstCompile = true
+  let isFirstNotification = true
   compiler.watch(
     {
       aggregateTimeout: 300,
@@ -120,6 +121,18 @@ export const createWebpackDevServer = (callback?: () => unknown) => {
             })
           )}\n`
         )
+
+        const isProcessNotFirstRun =
+          process.argv.length > 3 && process.argv[3] === 'firstTime'
+
+        if (!isProcessNotFirstRun) {
+          if (isFirstNotification) {
+            isFirstNotification = false
+          } else {
+            console.log('\n' + chalk.green(`Rebuilding has been completed.`))
+          }
+          return
+        }
       }, 100)
 
       if (isFirstCompile) {
@@ -170,17 +183,26 @@ export const devScript = async () => {
   )
 
   let child: ChildProcessByStdio<null, null, Readable> | undefined = undefined
-  const reset = async () => {
+  const reset = async (isFirst = false) => {
     if (typeof child?.kill === 'function') child?.kill()
-    child = spawn('frontbook-react', ['internal-worker'], {
-      stdio: [process.stdin, process.stdout, 'pipe'],
-      cwd: process.cwd()
-    })
+    child = spawn(
+      'frontbook-react',
+      isFirst ? ['internal-worker', 'firstTime'] : ['internal-worker'],
+      {
+        stdio: [process.stdin, process.stdout, 'pipe'],
+        cwd: process.cwd()
+      }
+    )
   }
 
   if (projectConfig.disableHMR !== true) {
     chokidar
-      .watch(componentPath, { awaitWriteFinish: true, ignoreInitial: true })
+      .watch(componentPath, { ignoreInitial: true })
+      .on('change', () => {
+        console.log(
+          '' + chalk.green(`File change detected. Rebuild is in progress...`)
+        )
+      })
       .on('add', (filePath) => {
         console.log(
           `\n\n` +
@@ -200,5 +222,5 @@ export const devScript = async () => {
         reset()
       })
   }
-  reset()
+  reset(true)
 }
