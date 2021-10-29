@@ -87,6 +87,7 @@ export const createWebpackDevServer = (callback?: () => unknown) => {
   const compiler = webpack(
     projectConfig.disableHMR !== true
       ? merge(config, {
+          mode: 'development',
           entry: {
             app: [
               'webpack-dev-server/client/index.js?hot=true&live-reload=true',
