@@ -121,7 +121,10 @@ const config: webpack.Configuration = {
                   }
                 ]
               ],
-              plugins: ['babel-plugin-typescript-to-proptypes']
+              plugins: [
+                'babel-plugin-typescript-to-proptypes',
+                { maxSize: 0, maxDepth: 1 }
+              ]
             }
           }
         ]
