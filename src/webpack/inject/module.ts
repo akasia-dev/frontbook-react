@@ -113,7 +113,8 @@ export const ReactWebComponent = (
       rendering = true
       Array.from(this.attributes as NamedNodeMap).forEach((attr) => {
         if (attr.name === 'style') return
-        if (attr) data[attr.name] = attr.nodeValue
+        const atributeName = attr.name === 'class' ? 'className' : attr.name
+        if (attr) data[atributeName] = attr.nodeValue
       })
 
       this.style.display = 'contents'
