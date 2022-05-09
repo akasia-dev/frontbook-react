@@ -61,7 +61,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "fast-glob": "^3.2.7",
-    "frontbook-conti-dist": "^1.0.6",
+    "frontbook-conti-dist": "^1.0.7",
     "modify-source-webpack-plugin": "^3.0.0",
     "nested-static": "^1.1.0",
     "preact": "^10.5.14",
