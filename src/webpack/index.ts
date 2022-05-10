@@ -16,6 +16,7 @@ import boxen from 'boxen'
 import chalk from 'chalk'
 import chokidar from 'chokidar'
 import { ChildProcessByStdio, spawn } from 'child_process'
+import which from 'which'
 import { Readable } from 'stream'
 import merge from 'webpack-merge'
 
@@ -84,6 +85,7 @@ export const watchScript = async () => {
 }
 
 export const createWebpackDevServer = (callback?: () => unknown) => {
+  console.log(chalk.green(`Starting Frontbook Webpack Server...`))
   const compiler = webpack(
     projectConfig.disableHMR !== true
       ? merge(config, {
@@ -142,7 +144,7 @@ export const createWebpackDevServer = (callback?: () => unknown) => {
     }
   )
 
-  const httpPort = String(projectConfig.port) ?? '5000'
+  const httpPort = String(projectConfig.port) ?? '5010'
   const server = new WebpackDevServer(
     {
       open: false,
@@ -171,6 +173,7 @@ export const createWebpackDevServer = (callback?: () => unknown) => {
 }
 
 export const devScript = async () => {
+  console.log(chalk.green(`Starting Frontbook Server...`))
   await installContiDist()
 
   process.on('SIGINT', () => {
@@ -186,12 +189,21 @@ export const devScript = async () => {
   let child: ChildProcessByStdio<null, null, Readable> | undefined = undefined
   const reset = async (isFirst = false) => {
     if (typeof child?.kill === 'function') child?.kill()
+    let frontbookReactPath = which.sync('frontbook-react', {
+      nothrow: true
+    })
+    if (!frontbookReactPath) {
+      console.log(chalk.red(`frontbook-react not found.`))
+      return
+    }
+
     child = spawn(
-      'frontbook-react',
+      frontbookReactPath,
       isFirst ? ['internal-worker', 'firstTime'] : ['internal-worker'],
       {
         stdio: [process.stdin, process.stdout, 'pipe'],
-        cwd: process.cwd()
+        cwd: process.cwd(),
+        shell: true
       }
     )
   }
